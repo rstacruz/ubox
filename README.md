@@ -10,15 +10,15 @@ How to use
    You may also load the CSS files. If you do, be sure to place them (incl.
    the images) in your project's folder as well.
 
-  <head>
-      ...
-      <script type="text/javascript" src="jquery.js"></script>
-      <script type="text/javascript" src="ubox.js"></script>
-      
-      <!-- The CSS (and images) are optional -->
-      <link rel="stylesheet" href="ubox.css" type="text/css" media="screen" />
-      ...
-  </head>
+       <head>
+           ...
+           <script type="text/javascript" src="jquery.js"></script>
+           <script type="text/javascript" src="ubox.js"></script>
+           
+           <!-- The CSS (and images) are optional -->
+           <link rel="stylesheet" href="ubox.css" type="text/css" media="screen" />
+           ...
+       </head>
 
 2. Add a link in your document with rel="ubox".
    The href must point to the ID of your popup, or the HTML file to be loaded
@@ -30,13 +30,13 @@ How to use
         <!-- You may also open via AJAX -->
         <a href="callback.html" rel="ubox">Click to open via AJAX</a>
     
-   The legacy class="popup-button" and class="popup-close" will also work for
+   The legacy `class="popup-button"` and `class="popup-close"` will also work for
    backward-compatibility reasons.
     
 3. If you're going to link to an element in the page like the #my-id
   example above, make a hidden div in your document with an ID of your
   choice. This can be placed anywhere (it will work no matter where it is),
-  but it's recommended to be placed right before </body> so that the page
+  but it's recommended to be placed right before `</body>` so that the page
   will load before the popup does.
   
   You can add a close button through a link with rel="ubox-close" added
@@ -54,8 +54,8 @@ Customizing
 
 1. Edit this script, or place these in one of your other JS files:
 
-      // Example: change the loading delay
-      $.ubox.options.delay = 400;
+        // Example: change the loading delay
+        $.ubox.options.delay = 400;
   
   The complete list of options are in the JS code.
   
@@ -88,12 +88,12 @@ Extra notes & tips
 - AJAX calls are limited to the same domain (browser restriction). Hence, you
   can't do anything like:
 
-     <a href="http://www.google.com" rel="ubox">
+       <a href="http://www.google.com" rel="ubox">
      
   To get around this limitation, try opening an inline popup to an iframe:
 
-     <a href="#google" rel="ubox">Open google</a>
-     <iframe src="http://www.google.com" id="google" style="display: none" />
+       <a href="#google" rel="ubox">Open google</a>
+       <iframe src="http://www.google.com" id="google" style="display: none" />
 
 JavaScript usage
 ----------------
