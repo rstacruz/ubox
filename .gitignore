@@ -1,0 +1,5 @@
+*.swo
+*.swp
+*~
+Thumbs.db
+.DS_Store
