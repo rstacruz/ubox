@@ -24,11 +24,11 @@ How to use
    The href must point to the ID of your popup, or the HTML file to be loaded
    through AJAX.
 
-      <!-- Will open #my-id -->
-      <a href="#my-id" rel="ubox">Click to open</a>
+        <!-- Will open #my-id -->
+        <a href="#my-id" rel="ubox">Click to open</a>
 
-      <!-- You may also open via AJAX -->
-      <a href="callback.html" rel="ubox">Click to open via AJAX</a>
+        <!-- You may also open via AJAX -->
+        <a href="callback.html" rel="ubox">Click to open via AJAX</a>
     
    The legacy class="popup-button" and class="popup-close" will also work for
    backward-compatibility reasons.
@@ -44,18 +44,18 @@ How to use
   
   You may style your popup window and close button with CSS as you please.
   
-    <div id="my-id" style="display: none">
-       <a href="#" rel="ubox-close">Close this</a>
-        ...
-    </div>
+        <div id="my-id" style="display: none">
+           <a href="#" rel="ubox-close">Close this</a>
+            ...
+        </div>
 
 Customizing
 -----------
 
 1. Edit this script, or place these in one of your other JS files:
 
-  // Example: change the loading delay
-  $.ubox.options.delay = 400;
+      // Example: change the loading delay
+      $.ubox.options.delay = 400;
   
   The complete list of options are in the JS code.
   
@@ -63,21 +63,22 @@ More advanced info
 ------------------
 
 This is what the script does when a opener link (an anchor link with
-rel="ubox") gets clicked:
+`rel="ubox"`) gets clicked:
 
-1. A new DIV is created with the ID "ubox-screen", which serves as a black
+1. A new DIV is created with the ID `ubox-screen`, which serves as a black
   screen that fades in.
   
-2. A container DIV with the ID "ubox-container" will be created:
-  <div id="ubox-container">
-     <div id="ubox-subcontainer">
-        (your popup element will be moved here)
-        .ubox-content
-        #ubox-loader
-     </div>
-  </div>
+2. A container DIV with the ID `ubox-container` will be created:
+
+      <div id="ubox-container">
+         <div id="ubox-subcontainer">
+            (your popup element will be moved here)
+            .ubox-content
+            #ubox-loader
+         </div>
+      </div>
   
-3. #ubox-container will be faded in.
+3. `#ubox-container` will be faded in.
 
 Extra notes & tips
 ------------------
@@ -86,9 +87,11 @@ Extra notes & tips
 
 - AJAX calls are limited to the same domain (browser restriction). Hence, you
   can't do anything like:
+
      <a href="http://www.google.com" rel="ubox">
      
   To get around this limitation, try opening an inline popup to an iframe:
+
      <a href="#google" rel="ubox">Open google</a>
      <iframe src="http://www.google.com" id="google" style="display: none" />
 
