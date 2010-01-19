@@ -109,3 +109,8 @@ Ubox can also be accessed through some simple JQuery commands.
 
     // To close the currently-open ubox:
     $.ubox.hide();
+
+Credits
+-------
+
+Contains the bgIframe plugin. http://github.com/brandonaaron/bgiframe

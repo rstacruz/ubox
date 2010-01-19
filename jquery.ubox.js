@@ -343,9 +343,22 @@
 	
 })(jQuery);
 
+/* The bgiframe plugin has been added in here. */
 
-// bgIframe plugin
+/*! Copyright (c) 2008 Brandon Aaron (http://brandonaaron.net)
+ * Dual licensed under the MIT (http://www.opensource.org/licenses/mit-license.php) 
+ * and GPL (http://www.opensource.org/licenses/gpl-license.php) licenses.
+ *
+ * Version 2.1.2-pre
+ */
 (function($){
+
+/**
+ * @name bgiframe
+ * @type jQuery
+ * @cat Plugins/bgiframe
+ * @author Brandon Aaron (brandon.aaron@gmail.com || http://brandonaaron.net)
+ */
 $.fn.bgIframe = $.fn.bgiframe = function(s) {
 	// This is only for IE6
 	if ( $.browser.msie && /6.0/.test(navigator.userAgent) ) {
