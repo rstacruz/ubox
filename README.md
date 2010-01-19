@@ -1,10 +1,10 @@
 uBox (for jQuery)
 =================
 
-Requires jQuery 1.3+.
-
 How to use
 ----------
+
+Requires jQuery 1.3+.
 
 1. Load the jQuery and uBox scripts (in that order).
    You may also load the CSS files. If you do, be sure to place them (incl.
