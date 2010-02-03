@@ -18,7 +18,7 @@
 {
 	$.ubox = function(p) { return $.ubox.show(p); }
 	$.fn.ubox = function() { $.ubox(this); }
-    $.ubox.options =
+    $.ubox.default_options =
     {
         screen_speed:     500,   // Speed of the black screen's fading in/out
         popup_speed:      500,   // Speed of the popup's fading in/out (no effect in IE)
@@ -26,7 +26,11 @@
         delay:            100,   // Delay in AJAX loading time
         allow_clickout:   true,  // Allow clicking on the background to close
         screen_opacity:   0.7,   // Opacity of the black screen (0...1)
-        screen_color:     "#000" // Color of the black screen
+        screen_color:     "#000",// Color of the black screen
+
+        // Hooks
+        on_popup: function() {},
+        on_resize: function() {}
     };
 	    
     $.extend($.ubox,
@@ -38,6 +42,8 @@
         $content:   null,  // #ubox-container > #ubox-subcontainer > #ubox-content popup window (null if not active), returned by _loadWindow
         $original:  null,  // What was loaded
         _ietimer:   null,  // Timer for IE
+
+        options: {},
         
 		/**
 		 * Opens the window and puts the right content in it.
@@ -52,60 +58,93 @@
             // appended to this.$subcon.
             
 			// Not AJAX?
-            var el = $(target);
-            if (el.length)
-			{
+            try
+            {
+                var el = $(target);
+                if (el.length == 0) { throw new Exception; }
+
+                // Continue
                 this.$original = el;
                 return $('<div class="ubox-content">').append(this.$original.show()).show();
             }
-            
-			// AJAX.
-            // Make it up. (.ubox-deferred means it's an async load, i.e., AJAX)
-            var el = $('<div class="ubox-content ubox-deferred">').hide();
-			var self = this;
-			
-            window.setTimeout(function()
-			{
-				$.get(target, function(data)
-	            {
-	                if (!self.$content) { return; }
-	                // Load the stuff (it's hidden right now btw)
-	                el.html(data);
+            // Catch a jQuery "can't parse" exception
+            catch (e)
+            {
+                // AJAX.
+                // Make it up. (.ubox-deferred means it's an async load, i.e., AJAX)
+                var el = $('<div class="ubox-content ubox-deferred">').hide();
+
+                var self = this;
                 
-	                // Delete the loader
-	                loader = self.$subcon.find(".ubox-loader");
-	                loader.hide();
+                window.setTimeout(function()
+                {
+                    $.get(target, function(data)
+                    {
+                        if (!self.$content) { return; }
+                        // Load the stuff (it's hidden right now btw)
+                        el.html(data);
+                    
+                        // Delete the loader
+                        loader = self.$subcon.find(".ubox-loader");
+                        loader.hide();
+                    
+                        // Make the content fit the loader
+                        self.$subcon
+                          .css({
+                            "width":  loader.outerWidth(),
+                            "height": loader.outerHeight()
+                          });
+
+                        // Then expand
+                        $.ubox.autoResize();
+                    });
+                }, self.options.delay);
                 
-	                // Make the content fit the loader, then expand
-	                var $c = self.$container;
-					var cpos = { "top": parseInt($c.css('top')), "left": parseInt($c.css('left')) };
-	                self.$subcon
-	                  .css({
-	                  	"width":  loader.outerWidth(),
-	                  	"height": loader.outerHeight()
-	                  })
-	                  .animate(
-	                    {
-							"width":  el.outerWidth(),
-							"height": el.outerHeight()
-						},
-	                    {
-						    "duration": self.options.transition_speed,
-						    "step": function(now, fx) {
-								// Animate the top/left position ourselves
-								var pos = (now - fx.start) / (fx.end - fx.start);
-								$c.css("top",  cpos.top  - (el.outerHeight() - loader.outerHeight())/2*pos);
-								$c.css("left", cpos.left - (el.outerWidth()  - loader.outerWidth()) /2*pos);
-							},
-	                    	"complete": function() {
-								el.fadeIn(self.options.transition_speed);
-							}
-						}
-	                  );
-	            });
-			}, self.options.delay);
-            
-            return el;
+                return el;
+            }
+        },
+
+        autoResize: function()
+        {
+            var $el = $('.ubox-content');
+            this.resize($el.outerWidth(), $el.outerHeight());
+        },
+
+        resize: function(width, height)
+        {
+            var self = this;
+            var el = self.$content;
+            var $c = self.$container;
+            var cpos =
+            {
+                "top":  parseInt($c.css('top')),
+                "left": parseInt($c.css('left'))
+            };
+            var targetpos =
+            {
+                "top":  (height - parseInt(self.$subcon.css('height'))),
+                "left": (width  - parseInt(self.$subcon.css('width')))
+            };
+         
+            self.$subcon.animate(
+                {
+                    "width":  width,
+                    "height": height
+                },
+                {
+                    "duration": self.options.transition_speed,
+                    "step": function(now, fx) {
+                        // Animate the top/left position ourselves
+                        var pos = (now - fx.start) / (fx.end - fx.start);
+                        $c.css("top",  cpos.top  - targetpos.top  /2*pos);
+                        $c.css("left", cpos.left - targetpos.left /2*pos);
+                    },
+                    "complete": function() {
+                        el.fadeIn(self.options.transition_speed);
+                        self.options.on_resize();
+                    }
+                }
+              );
         },
         
     	/**
@@ -116,13 +155,21 @@
     	 * // Loads the "my-overlay" box.
     	 * $.ubox.show('#my-overlay');
     	 */
-	    show: function(target)
+	    show: function(target, custom_options)
     	{
+            // Set defaults
+            // (These can also be combined with the default options in the future...)
+            if (!custom_options) { custom_options = {}; }
+
+            // Reset the options
+            this.options = $.extend($.extend({}, this.default_options), custom_options);
+            var options = this.options;
+
     		// Loads popup only if it is disabled.
     		if (!this.$content)
     		{
     		    this.$content = this._loadWindow(target);
-		    
+
     		    // Activate the background popup
     			this.$screen.css(
     			{
@@ -153,6 +200,10 @@
                 else {
                     // Shows, but this will not be shown as it's container
                     // is still invisible.
+                    // Blah blah: Get classname from link
+                    //var classname = $(target)[0].className; this.$content.find(">*:first-child").attr('class');
+                    var classname = this.$content.find(">*:first-child").attr('class');
+                    this.$container.addClass(classname);
 		            this.$subcon.append(this.$content);
                 }
                 
@@ -184,6 +235,9 @@
     			// Quickly switch to the new popup
     			this.$content = new_content;
     		}
+
+            // We're done
+            this.options.on_popup();
     	},
     	
     	/**
@@ -242,15 +296,15 @@
     		        .css({ "display": "none" })
     		        .insertBefore($(document.body.firstChild));
     		
-    		this.$subcon = $('<div id="ubox-subcontainer">')
-    		        .css({ "overflow": "hidden" });
+    		this.$subcon = $('<div id="ubox-subcontainer">');
+    		        //.css({ "overflow": "hidden" });
     		    
     		this.$container.append(this.$subcon);
     		
-    		$("a.popup-button, a[rel=ubox]").live("click", function()
+    		$("a.popup-button, a[rel~=ubox]").live("click", function()
     		{
 				self.show($(this).attr('href'));
-				$(this).blur();
+				$(this).blur(); // Remove focus from the link
 				return false;
 			});
 		
@@ -261,7 +315,7 @@
 				return false;
 			});
 		
-    		$(".popup-close, a[rel=ubox-close]").live("click", function()
+    		$(".popup-close, a[rel~=ubox-close]").live("click", function()
     		{
 				$(this).blur();
 				self.kill();
