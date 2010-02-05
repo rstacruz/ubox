@@ -16,8 +16,8 @@
  
 (function($)
 {
-	$.ubox = function(p) { return $.ubox.show(p); }
-	$.fn.ubox = function() { $.ubox(this); }
+    $.ubox = function(p) { return $.ubox.show(p); }
+    $.fn.ubox = function() { $.ubox(this); }
     $.ubox.default_options =
     {
         screen_speed:     500,   // Speed of the black screen's fading in/out
@@ -54,56 +54,84 @@
 		 */
         _loadWindow: function (target)
         {	
-            // What is returned will be referred to as $content and
+            // What is returned (.ubox-content) will be referred to as $content and
             // appended to this.$subcon.
             
-			// Not AJAX?
+            // If given a jQuery object...
+            if ((typeof target == "object") && (target.css))
+            {
+                return this._loadWindowViaElement(target);
+
+            }
+
             try
             {
+                // Try to query it. This can throw an exception.
                 var el = $(target);
-                if (el.length == 0) { throw new Exception; }
 
-                // Continue
-                this.$original = el;
-                return $('<div class="ubox-content">').append(this.$original.show()).show();
+                // If it doesn't match anything, maybe it's something else
+                if (el.length == 0)
+                    { return this._loadWindowViaAJAX(target); }
+
+                else
+                    { return this._loadWindowViaElement(target); }
             }
-            // Catch a jQuery "can't parse" exception
+
+            // Catch a jQuery "can't parse" exception.
             catch (e)
             {
-                // AJAX.
-                // Make it up. (.ubox-deferred means it's an async load, i.e., AJAX)
-                var el = $('<div class="ubox-content ubox-deferred">').hide();
-
-                var self = this;
-                
-                window.setTimeout(function()
-                {
-                    $.get(target, function(data)
-                    {
-                        if (!self.$content) { return; }
-                        // Load the stuff (it's hidden right now btw)
-                        el.html(data);
-                    
-                        // Delete the loader
-                        loader = self.$subcon.find(".ubox-loader");
-                        loader.hide();
-                    
-                        // Make the content fit the loader
-                        self.$subcon
-                          .css({
-                            "width":  loader.outerWidth(),
-                            "height": loader.outerHeight()
-                          });
-
-                        // Then expand
-                        $.ubox.autoResize();
-                    });
-                }, self.options.delay);
-                
-                return el;
+                // If there's a parse error, it's probably a URL that we should load via AJAX.
+                return this._loadWindowViaURL(target);
             }
         },
 
+        // Target should be a jQuery object
+        _loadWindowViaElement: function (target)
+        {
+            // Continue
+            this.$original = target;
+            return $('<div class="ubox-content">').append(this.$original.show()).show();
+        },
+
+        _loadWindowViaURL: function (target)
+        {
+            // AJAX.
+            // Make it up. (.ubox-deferred means it's an async load, i.e., AJAX)
+            var el = $('<div class="ubox-content ubox-deferred">').hide();
+
+            var self = this;
+            
+            window.setTimeout(function()
+            {
+                $.get(target, function(data)
+                {
+                    if (!self.$content) { return; }
+                    // Load the stuff (it's hidden right now btw)
+                    el.html(data);
+                
+                    // Delete the loader
+                    loader = self.$subcon.find(".ubox-loader");
+                    loader.hide();
+                
+                    // Make the content fit the loader
+                    self.$subcon
+                      .css({
+                        "width":  loader.outerWidth(),
+                        "height": loader.outerHeight()
+                      });
+
+                    // Then expand
+                    $.ubox.autoResize();
+                });
+            }, self.options.delay);
+            
+            return el;
+        },
+
+        /**
+         * Automatically resizes the open popup.
+         * $.ubox.autoResize();
+         */
         autoResize: function()
         {
             var $el = $('.ubox-content');
