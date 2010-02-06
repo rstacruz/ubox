@@ -1,5 +1,5 @@
 ﻿/*
- * uBox jQuery lightbox plugin (v0.1.3 - Nov 3 2009)
+ * uBox jQuery lightbox plugin (v0.1.5 - Jan 6 2010)
  * Requires jQuery 1.3+
  *
  * Quick HTML usage guide:
