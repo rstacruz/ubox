@@ -56,7 +56,7 @@ The `rel="ubox"` attribute only supports loading external HTML's via AJAX or
 inline content. To load images, load the `jquery.ubox-photos.js` file (after
 `jquery.ubox.js`) and use:
 
-    <a href="image.jpg" rel="ubox-photo">CLick to open photo</a>
+    <a href="image.jpg" rel="ubox-photo">Click to open photo</a>
 
 Customizing
 -----------
@@ -92,14 +92,14 @@ This is what the script does when a opener link (an anchor link with
 Extra notes & tips
 ------------------
 
-- Try styling the containers yourself. The CSS file has info on this.
+1. Try styling the containers yourself. The CSS file has info on this.
 
-- AJAX calls are limited to the same domain (browser restriction). Hence, you
-  can't do anything like:
+2. AJAX calls are limited to the same domain (browser restriction). Hence, you
+   can't do anything like:
 
        <a href="http://www.google.com" rel="ubox">
      
-  To get around this limitation, try opening an inline popup to an iframe:
+3. To get around this limitation, try opening an inline popup to an iframe:
 
        <a href="#google" rel="ubox">Open google</a>
        <iframe src="http://www.google.com" id="google" style="display: none" />
@@ -117,7 +117,7 @@ Ubox can also be accessed through some simple JQuery commands.
     $.ubox("another_page.html");
 
     // To close the currently-open ubox:
-    $.ubox.hide();
+    $.ubox.kill();
 
 Credits
 -------
