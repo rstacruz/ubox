@@ -1,3 +1,7 @@
+v0.1.7
+ - Baked the template for ubox-photo onto the JavaScript file
+ - Added $.ubox.set()
+
 v0.1.6 - Jan 9 2010
  - Numerous bug fixes
  - Fixed non-AJAX popups not centering when triggered from another popup

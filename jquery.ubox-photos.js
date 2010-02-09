@@ -1,3 +1,11 @@
+/*
+ * uBox jQuery lightbox plugin - optional photo support (v0.1.7)
+ * Requires jQuery 1.3+
+ *
+ * Quick HTML usage guide:
+ *   <a href="image.jpg" rel="ubox-photo">
+ */
+
 (function($){
     $.ubox_photos = {};
     $.ubox_photos.options =

@@ -1,11 +1,13 @@
 ﻿/*
- * uBox jQuery lightbox plugin (v0.1.6)
+ * uBox jQuery lightbox plugin (v0.1.7)
  * Requires jQuery 1.3+
  *
  * Quick HTML usage guide:
  *   <div id="overlay" style="display:none">I'm hidden but will be shown later</div>
  *   <a href="#overlay" rel="ubox">Open div#overlay in a popup</a>
  *   <a href="via_ajax.html" rel="ubox">Load via AJAX</a>
+ *
+ * To use ubox on photos, use jquery.ubox-photos.js.
  *
  * Quick JS usage guide:
  *   $.ubox("#overlay");

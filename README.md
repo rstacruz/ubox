@@ -49,13 +49,22 @@ Requires jQuery 1.3+.
             ...
         </div>
 
+Using with photos
+-----------------
+
+The `rel="ubox"` attribute only supports loading external HTML's via AJAX or
+inline content. To load images, load the `jquery.ubox-photos.js` file (after
+`jquery.ubox.js`) and use:
+
+    <a href="image.jpg" rel="ubox-photo">CLick to open photo</a>
+
 Customizing
 -----------
 
 1. Edit this script, or place these in one of your other JS files:
 
         // Example: change the loading delay
-        $.ubox.options.delay = 400;
+        $.ubox.options.set({'delay': 400 });
   
   The complete list of options are in the JS code.
   
