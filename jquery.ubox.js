@@ -44,6 +44,15 @@
         _ietimer:   null,  // Timer for IE
 
         options: {},
+
+        /**
+         * Sets options.
+         * Example: $.ubox.set({ 'screen_color': '#555' });
+         */
+        set: function (custom_options)
+        {
+            $.extend($.ubox.default_options, custom_options);
+        },
         
 		/**
 		 * Opens the window and puts the right content in it.
@@ -139,6 +148,9 @@
             this.resize($el.outerWidth(), $el.outerHeight());
         },
 
+        /**
+         * Resizes to a target width/height (with animation).
+         */
         resize: function(width, height)
         {
             var self = this;

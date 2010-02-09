@@ -2,7 +2,14 @@
     $.ubox_photos = {};
     $.ubox_photos.options =
     {
-        template: "#ubox-photo",
+        // The template of the popup window.
+        // Can be a jQuery element or a jQuey selector string.
+        template: $(
+            "<div id='ubox-photo' class='loading' style='display:none'>" +
+                "<a class='ubox-close' rel='ubox-close'>Close</a>" +
+                "<div class='spinner'><span>Loading...</span></div>" +
+                "<div class='photo'><img class='_photo' src='' alt='' /></div>" +
+            "</div>"),
         delay: 0
     };
     var options = $.ubox_photos.options;
