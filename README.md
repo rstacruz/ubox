@@ -98,7 +98,7 @@ Extra notes & tips
    can't do anything like:
 
        <a href="http://www.google.com" rel="ubox">Open google</a>
-     
+
 3. To get around this limitation, try opening an inline popup to an iframe:
 
        <a href="#google" rel="ubox">Open google</a>
