@@ -2,7 +2,7 @@
     $.ubox_photos = {};
     $.ubox_photos.options =
     {
-        target: "#ubox-photo",
+        template: "#ubox-photo",
         delay: 0
     };
     var options = $.ubox_photos.options;
@@ -13,6 +13,11 @@
         current: {
             image: ''
         },
+        set: function(custom_options)
+        {
+            $.extend($.ubox_photos.options, custom_options);
+            return this;
+        },
         _init: function()
         {
             $("a[rel~=ubox-photo]").live('click', function()
@@ -21,7 +26,7 @@
                 self.current.image = $(this).attr("href");
 
                 // Duplicate the template and replace
-                var $template = $(options.target).clone();
+                var $template = $(options.template).clone();
                 self.$popup = $template;
 				$.ubox.show(self.$popup, { 'on_popup': self._onPopup, 'on_resize': self._onResize });
 				$(this).blur(); // Remove focus from the link
@@ -35,18 +40,19 @@
         _onPopup: function($link)
         {
             var $photo = self.$popup.find("img._photo");
+            var $popup = self.$popup;
             $photo.load(function() {
                 window.setTimeout(function()
                 {
                     // Measure the final dimensions
                     var $el = $('.ubox-content');
-                    $("#ubox-photo").removeClass("loading");
+                    $popup.removeClass("loading");
                     var o = { 'width': $el.outerWidth(), 'height': $el.outerHeight() };
-                    $("#ubox-photo").addClass("loading");
+                    $popup.addClass("loading");
 
                     // Resize to it
                     $.ubox.resize(o.width, o.height);
-                    $("#ubox-photo").removeClass("loading").addClass("resizing");
+                    $popup.removeClass("loading").addClass("resizing");
                 }, self.options.delay );
             });
             $photo.attr("src", self.current.image);
@@ -54,3 +60,4 @@
     });
     $(function() { $.ubox_photos._init(); });
 })(jQuery);
+

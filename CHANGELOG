@@ -1,0 +1,7 @@
+v0.1.6 - Jan 9 2010
+ - Numerous bug fixes
+ - Fixed non-AJAX popups not centering when triggered from another popup
+
+v0.1.5
+ - Numerous bug fixes
+ - Added the optional jquery.ubox-photo which adds support for photos (still undocumented)

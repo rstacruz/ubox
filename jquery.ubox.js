@@ -1,5 +1,5 @@
 ﻿/*
- * uBox jQuery lightbox plugin (v0.1.5 - Jan 6 2010)
+ * uBox jQuery lightbox plugin (v0.1.6)
  * Requires jQuery 1.3+
  *
  * Quick HTML usage guide:
@@ -59,30 +59,31 @@
             
             // If given a jQuery object...
             if ((typeof target == "object") && (target.css))
-            {
-                return this._loadWindowViaElement(target);
+                { return this._loadWindowViaElement(target); }
 
-            }
+            // Must be string from this point forward
+            if (typeof target != "string")
+                { return null; }
+        
+            // If it isn't preceded by a #, then it's a URL
+            if (target.substr(0,1) != '#')
+                { return this._loadWindowViaURL(target); }
 
+            // If preceded by #, it's an ID
             try
             {
                 // Try to query it. This can throw an exception.
                 var el = $(target);
 
-                // If it doesn't match anything, maybe it's something else
-                if (el.length == 0)
-                    { return this._loadWindowViaAJAX(target); }
-
-                else
-                    { return this._loadWindowViaElement(target); }
+                // If match: then go
+                if (el.length > 0)
+                    { return this._loadWindowViaElement(el); }
             }
 
             // Catch a jQuery "can't parse" exception.
-            catch (e)
-            {
-                // If there's a parse error, it's probably a URL that we should load via AJAX.
-                return this._loadWindowViaURL(target);
-            }
+            catch (e) {}
+
+            return null;
         },
 
         // Target should be a jQuery object
@@ -196,7 +197,9 @@
     		// Loads popup only if it is disabled.
     		if (!this.$content)
     		{
-    		    this.$content = this._loadWindow(target);
+    		    var ubox_content = this._loadWindow(target);
+                if (!ubox_content) { return false; }
+                this.$content = ubox_content;
 
     		    // Activate the background popup
     			this.$screen.css(
@@ -236,7 +239,7 @@
                 }
                 
                 // Show popup window
-                this._centerPopup(this.$content);
+                this._centerPopup();
     		}
 		
     		// If the popup is already shown
@@ -246,7 +249,8 @@
     			if (this.$original)
     			    { $(document.body).append(this.$original.hide()); }
     			
-    			new_content = this._loadWindow(target);
+    			var new_content = this._loadWindow(target);
+    			this.$content = new_content;
     			
     			this.$subcon.empty();
     			if (new_content.is(".ubox-deferred")) {
@@ -257,11 +261,14 @@
     			    loader.css({ "width": this.$subcon.width()-ox,
     			        "height": this.$subcon.height()-oy });
     			    loader.fadeIn(this.options.transition_speed);
+                    this.$subcon.append(new_content);
 			    }
-			    this.$subcon.append(new_content);
+                else {
+                    this.$subcon.append(new_content);
+                    this._centerPopup();
+                }
 			
     			// Quickly switch to the new popup
-    			this.$content = new_content;
     		}
 
             // We're done
@@ -371,10 +378,9 @@
 	     * @private
 	     */
 	     
-	    _centerPopup: function (target_id)
+	    _centerPopup: function()
     	{
-		    
-    		popup = this.$container;
+    		var popup = this.$container;
     		var windowWidth  = document.documentElement.clientWidth;
     		var windowHeight = document.documentElement.clientHeight;
     		var popupHeight  = popup.outerHeight();
@@ -417,7 +423,6 @@
 			// Fade in
     		popup.css({ "z-index": 10003 }).fadeIn(this.options.popup_speed);
     	}
-	
     });
 
 	// Let's rock.
@@ -470,3 +475,4 @@ $.fn.bgIframe = $.fn.bgiframe = function(s) {
 };
 
 })(jQuery);
+
