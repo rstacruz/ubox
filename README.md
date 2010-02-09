@@ -97,7 +97,7 @@ Extra notes & tips
 2. AJAX calls are limited to the same domain (browser restriction). Hence, you
    can't do anything like:
 
-       <a href="http://www.google.com" rel="ubox">
+       <a href="http://www.google.com" rel="ubox">Open google</a>
      
 3. To get around this limitation, try opening an inline popup to an iframe:
 
