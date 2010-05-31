@@ -1,0 +1,13 @@
+/* Ubox photo */
+#ubox-photo.loading div.photo { display: none; }
+#ubox-photo.resizing div.photo { visibility: hidden; } 
+
+#ubox-photo .spinner { width: 100px; height: 100px; background: url(ubox-load.gif) center center no-repeat; }
+#ubox-photo .spinner span { display: none; }
+
+#ubox-photo .spinner { display: none; }
+#ubox-photo.loading .spinner { display: block; }
+
+.ubox-content { position: relative; overflow: none; }
+.ubox-content a.ubox-close { position: absolute; top: -19px; right: -19px; display: block; width: 42px; height: 40px; background: url(ubox-close.png); text-indent: -9999px; }
+.ubox-content a.ubox-close:hover { background-position: -42px 0; }
