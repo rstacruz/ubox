@@ -2,7 +2,7 @@
     $.ubox_photos = {};
     $.ubox_photos.options =
     {
-        template: "#ubox-photo",
+template: "<div id='ubox-photo' class='loading' style='display: none'><a class='ubox-close' rel='ubox-close'>Close</a><div class='spinner'>Loading...</div><div class='photo'><img class='photo' /></div></div>",
         delay: 0
     };
     var options = $.ubox_photos.options;
