@@ -1,3 +1,8 @@
+v0.1.7 - August 4 2010
+ - Added onopen and onclose callbacks via $.ubox.onopen(function() { ... }).
+ - Fix a bug where the custom options are not being used.
+ - Added $.ubox.autoResize().
+
 v0.1.6 - Jan 9 2010
  - Numerous bug fixes
  - Fixed non-AJAX popups not centering when triggered from another popup

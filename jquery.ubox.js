@@ -1,5 +1,5 @@
 ﻿/*
- * uBox jQuery lightbox plugin (v0.1.6)
+ * uBox jQuery lightbox plugin (v0.1.7)
  * Requires jQuery 1.3+
  *
  * Quick HTML usage guide:
@@ -11,9 +11,25 @@
  *   $.ubox("#overlay");
  *   $("#overlay").ubox();
  *   $.ubox("load_via_ajax.html");
- *   $.ubox.hide();
+ *   $.ubox.kill();
+ *
+ * Setting options example:
+ *   $.ubox.options.delay = 1;
+ *
+ * Adding a close hook:
+ * $.ubox.onclose(function() {{
+ *     // `this` is $.ubox
+ *
+ *     if (this.target == "/url-that-was-clicked") {
+ *         // do stuff
+ *     }
+ *
+ *     if (this.link.attr("data-id") == "...") {
+ *         // this.link will be the link that was clicked (or null if activated manually)
+ *     }
+ * });
  */
- 
+
 (function($)
 {
     $.ubox = function(p) { return $.ubox.show(p); }
@@ -29,10 +45,11 @@
         screen_color:     "#000",// Color of the black screen
 
         // Hooks
+        // TODO: deprecate this in favor of $.ubox.onpopup, etc
         on_popup: function() {},
         on_resize: function() {}
     };
-	    
+
     $.extend($.ubox,
     {
         // Properties
@@ -44,19 +61,27 @@
         _ietimer:   null,  // Timer for IE
 
         options: {},
-        
-		/**
-		 * Opens the window and puts the right content in it.
-		 * Returns the #ubox-content element.
-		 * Called by show(). show() will take care of starting the screen and
-		 * other things
-		 * @private
-		 */
+
+        // will be set to the target on open
+        target: null,
+
+        // will be set to the link clicked on open
+        link: null,
+
+        /**
+         * Opens the window and puts the right content in it.
+         * Returns the #ubox-content element.
+         * Called by show(). show() will take care of starting the screen and
+         * other things
+         * @private
+         */
         _loadWindow: function (target)
-        {	
+        {
             // What is returned (.ubox-content) will be referred to as $content and
             // appended to this.$subcon.
-            
+
+            this.target = target;
+
             // If given a jQuery object...
             if ((typeof target == "object") && (target.css))
                 { return this._loadWindowViaElement(target); }
@@ -64,7 +89,7 @@
             // Must be string from this point forward
             if (typeof target != "string")
                 { return null; }
-        
+
             // If it isn't preceded by a #, then it's a URL
             if (target.substr(0,1) != '#')
                 { return this._loadWindowViaURL(target); }
@@ -91,7 +116,9 @@
         {
             // Continue
             this.$original = target;
-            return $('<div class="ubox-content">').append(this.$original.show()).show();
+            var re = $('<div class="ubox-content">').append(this.$original.show()).show();
+            this.onopen();
+            return re;
         },
 
         _loadWindowViaURL: function (target)
@@ -101,7 +128,7 @@
             var el = $('<div class="ubox-content ubox-deferred">').hide();
 
             var self = this;
-            
+
             window.setTimeout(function()
             {
                 $.get(target, function(data)
@@ -109,11 +136,11 @@
                     if (!self.$content) { return; }
                     // Load the stuff (it's hidden right now btw)
                     el.html(data);
-                
+
                     // Delete the loader
                     loader = self.$subcon.find(".ubox-loader");
                     loader.hide();
-                
+
                     // Make the content fit the loader
                     self.$subcon
                       .css({
@@ -123,9 +150,11 @@
 
                     // Then expand
                     $.ubox.autoResize();
+
+                    self.onopen();
                 });
             }, self.options.delay);
-            
+
             return el;
         },
 
@@ -154,7 +183,7 @@
                 "top":  (height - parseInt(self.$subcon.css('height'))),
                 "left": (width  - parseInt(self.$subcon.css('width')))
             };
-         
+
             self.$subcon.animate(
                 {
                     "width":  width,
@@ -175,7 +204,7 @@
                 }
               );
         },
-        
+
     	/**
     	 * Loads the popup.
     	 * Called by onclick events.
@@ -190,9 +219,13 @@
             // (These can also be combined with the default options in the future...)
             if (!custom_options) { custom_options = {}; }
 
-            // Reset the options
-            this.options = $.extend($.extend({}, this.default_options), custom_options);
-            var options = this.options;
+            // Load custom options
+            var options = $.extend($.extend({}, this.options), custom_options);
+
+            if (options.link)
+                { this.link = $(options.link); }
+            else
+                { this.link = null; }
 
     		// Loads popup only if it is disabled.
     		if (!this.$content)
@@ -213,20 +246,20 @@
     				"left":       0,
     				"z-index":    10001
     			});
-			
+
     			// IE6 fix for dropdown boxes: Use bgiframe.
     		    if (($.browser.msie) && ($.browser.version < 6.5))
     			    { this.$screen.bgiframe(); }
 
                 // Show screen
-    			this.$screen.fadeIn(this.options.screen_speed, function() {});
+    			      this.$screen.fadeIn(this.options.screen_speed, function() {});
 
                 // Dynamicly-generated box for async (AJAX) loads
                 if (this.$content.is(".ubox-deferred")) {
                     this.$subcon.append($('<div class="ubox-loader">'));
 		            this.$subcon.append(this.$content);
                 }
-                
+
                 // Box that's pulled from the content
                 else {
                     // Shows, but this will not be shown as it's container
@@ -237,21 +270,21 @@
                     this.$container.addClass(classname);
 		            this.$subcon.append(this.$content);
                 }
-                
+
                 // Show popup window
                 this._centerPopup();
     		}
-		
+
     		// If the popup is already shown
     		else
     		{
     			// Abruptly make the old popup disappear
     			if (this.$original)
     			    { $(document.body).append(this.$original.hide()); }
-    			
+
     			var new_content = this._loadWindow(target);
     			this.$content = new_content;
-    			
+
     			this.$subcon.empty();
     			if (new_content.is(".ubox-deferred")) {
     			    loader = $('<div class="ubox-loader">').hide();
@@ -267,117 +300,154 @@
                     this.$subcon.append(new_content);
                     this._centerPopup();
                 }
-			
+
     			// Quickly switch to the new popup
     		}
 
             // We're done
             this.options.on_popup();
     	},
-    	
+
+      _onclose: [],
+
+      onclose: function(callback)
+      {
+          if (callback) {
+              return this._onclose.push(callback);
+          }
+
+          else {
+              for (var i=0; i<this._onclose.length; ++i) {
+                  var cb = this._onclose[i];
+                  cb.apply(this, [this]);
+              }
+          }
+      },
+
+      _onopen: [],
+
+      onopen: function(callback)
+      {
+          if (callback) {
+              return this._onopen.push(callback);
+          }
+
+          else {
+              for (var i=0; i<this._onopen.length; ++i) {
+                  var cb = this._onopen[i];
+                  cb.apply(this, [this]);
+              }
+          }
+      },
+
     	/**
     	 * Gets rid of the popup.
     	 */
-    	
+
     	kill: function()
-    	{    
+    	{
     		// Disable the popup only if it is enabled
     		if (!this.$content) { return; }
-		
+
     		// Disable the IE timer if it's been turned on.
     		if (this._ietimer)
     		    { window.clearTimeout(this._ietimer); }
-		
+
+        // Call onclose
+        this.onclose();
+
     		// Fade out the windows.
-			var self = this;
+			  var self = this;
     		this.$screen.fadeOut(this.options.screen_speed);
     		this.$container.fadeOut(this.options.popup_speed, function() {
     		    self.$content.hide();
     		    // Clear, and clear any dimensions set by the ajax thing
     		    self.$subcon.html('');
     		    self.$subcon.css({"width":"","height":""});
-    		    
+
     		    // If we pulled something from the source, put it back
     		    if (self.$original) {
     		        $(document.body).append(self.$original.hide());
     		        self.$original = null;
 		        }
-		        
+
     		    self.$content = null;
-    		});    		
+    		});
 	    },
-	    
+
 	    /**
 	     * Called on document ready; initializes the hooks.
 	     * @private
 	     */
-	     
+
 	    _init: function()
 	    {
 	        if ($.browser.msie)
 	            { this.options.popup_speed = 0; }
-	            
+
 			var self = this;
-			
+
+            this.options = $.extend($.extend({}, this.default_options), this.options);
+
     	    // Screen
     		this.$screen =
     		    $('<div id="ubox-screen">')
     		        .css({ "display": "none" })
     		        .insertBefore($(document.body.firstChild));
-    		        
+
     	    // Border
     		this.$container =
     		    $('<div id="ubox-container">')
     		        .css({ "display": "none" })
     		        .insertBefore($(document.body.firstChild));
-    		
+
     		this.$subcon = $('<div id="ubox-subcontainer">');
     		        //.css({ "overflow": "hidden" });
-    		    
+
     		this.$container.append(this.$subcon);
-    		
+
     		$("a.popup-button, a[rel~=ubox]").live("click", function()
     		{
-				self.show($(this).attr('href'));
-				$(this).blur(); // Remove focus from the link
-				return false;
-			});
-		
+            self.show($(this).attr('href'), { link: this });
+            $(this).blur(); // Remove focus from the link
+            return false;
+			  });
+
     		$("input.popup-button").click(function()
     		{
-				self.show($(this.form).attr('action'));
-				$(this).blur();
-				return false;
-			});
-		
+            self.show($(this.form).attr('action'), { link: this });
+            $(this).blur();
+            return false;
+        });
+
     		$(".popup-close, a[rel~=ubox-close]").live("click", function()
     		{
-				$(this).blur();
-				self.kill();
-				return false;
-			});
-		
+            $(this).blur();
+            self.kill();
+            return false;
+        });
+
     		// Click out
     		this.$screen.click(function()
     		{
-				if (self.options.allow_clickout)
-					{ self.kill(); }
-			});
+            if (self.options.allow_clickout)
+              { self.kill(); }
+        });
 
     		// Escape key
-    		$(document).keypress(function(e)
+    		$(document).keyup(function(e)
     		{
-    			if ((e.keyCode == 27) && (self.$content))
-    				{ self.kill(); }
+            if ((e.keyCode == 27) && (self.$content))
+              { self.kill(); }
     		});
         },
-	    
+
 	    /**
 	     * Initializes the popup window.
 	     * Makes `$container` visible and placed in the center.
 	     * @private
 	     */
-	     
+
 	    _centerPopup: function()
     	{
     		var popup = this.$container;
@@ -391,7 +461,7 @@
     			"top": windowHeight/2-popupHeight/2,
     			"left": windowWidth/2-popupWidth/2
     		});
-		
+
     		// MSIE does not support `position: fixed`, so we work around it.
     		if ($.browser.msie)
 			{
@@ -419,7 +489,7 @@
         			}
         		}, 25);
     		}
-		
+
 			// Fade in
     		popup.css({ "z-index": 10003 }).fadeIn(this.options.popup_speed);
     	}
@@ -427,13 +497,13 @@
 
 	// Let's rock.
 	$(function() { $.ubox._init(); });
-	
+
 })(jQuery);
 
 /* The bgiframe plugin has been added in here. */
 
 /*! Copyright (c) 2008 Brandon Aaron (http://brandonaaron.net)
- * Dual licensed under the MIT (http://www.opensource.org/licenses/mit-license.php) 
+ * Dual licensed under the MIT (http://www.opensource.org/licenses/mit-license.php)
  * and GPL (http://www.opensource.org/licenses/gpl-license.php) licenses.
  *
  * Version 2.1.2-pre
@@ -475,4 +545,3 @@ $.fn.bgIframe = $.fn.bgiframe = function(s) {
 };
 
 })(jQuery);
-
